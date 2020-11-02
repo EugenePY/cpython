@@ -904,11 +904,13 @@ class singledispatchmethod:
 
         Registers a new implementation for the given *cls* on a *generic_method*.
         """
+        if hasattr(cls, "__func__"):
+            setattr(cls, "__annotations__", cls.__func__.__annotations__)
         return self.dispatcher.register(cls, func=method)
 
     def __get__(self, obj, cls=None):
         def _method(*args, **kwargs):
-            method = self.dispatcher.dispatch(args[0].__class__)
+            method = self.dispatcher.dispatch(args[-1].__class__)
             return method.__get__(obj, cls)(*args, **kwargs)
 
         _method.__isabstractmethod__ = self.__isabstractmethod__

@@ -2336,6 +2336,52 @@ class TestSingleDispatch(unittest.TestCase):
         self.assertEqual(a.t(''), "str")
         self.assertEqual(a.t(0.0), "base")
 
+    def test_type_ann_classmethod_register(self):
+        class A:
+            def __init__(self, arg):
+                self.arg = arg
+
+            @functools.singledispatchmethod
+            @classmethod
+            def t(cls, arg):
+                return cls("base")
+
+            @t.register
+            @classmethod
+            def _(cls, arg: int):
+                return cls("int")
+
+            @t.register
+            @classmethod
+            def _(cls, arg: str):
+                return cls("str")
+
+        self.assertEqual(A.t(0).arg, "int")
+        self.assertEqual(A.t('').arg, "str")
+        self.assertEqual(A.t(0.0).arg, "base")
+
+    def test_type_ann_staticmethod_register(self):
+        class A:
+            @functools.singledispatchmethod
+            @staticmethod
+            def t(arg):
+                return "base"
+
+            @t.register
+            @staticmethod
+            def _(arg: int):
+                return "int"
+
+            @t.register
+            @staticmethod
+            def _(arg: str):
+                return "str"
+
+        self.assertEqual(A.t(0), "int")
+        self.assertEqual(A.t(''), "str")
+        self.assertEqual(A.t(0.0), "base")
+
+
     def test_invalid_registrations(self):
         msg_prefix = "Invalid first argument to `register()`: "
         msg_suffix = (
