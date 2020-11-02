@@ -904,6 +904,8 @@ class singledispatchmethod:
 
         Registers a new implementation for the given *cls* on a *generic_method*.
         """
+        if isinstance(cls, classmethod) or isinstance(cls, staticmethod):
+            setattr(cls,"__annotations__", cls.__func__.__annotations__)
         return self.dispatcher.register(cls, func=method)
 
     def __get__(self, obj, cls=None):
